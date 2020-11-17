@@ -60,7 +60,7 @@ void adopt(Window w, XWindowAttributes *attrib) {
   XSelectInput(display, w, EnterWindowMask|FocusChangeMask|PropertyChangeMask|StructureNotifyMask);
   wc.border_width = borderWidth;
   XConfigureWindow(display, w, CWBorderWidth, &wc);
-	XSetWindowBorder(display, w, _RGB(255,0,0));
+  XSetWindowBorder(display, w, _RGB(255,0,0));
   Client *c = createClient(w);
   attachClient(c, activeMonitor);
   layoutMonitor(activeMonitor, display, borderWidth);
@@ -80,25 +80,25 @@ void unadopt(Window w) {
 
 void mapRequest(XEvent *e) {
   static XWindowAttributes wa;
-	XMapRequestEvent *ev = &e->xmaprequest;
+  XMapRequestEvent *ev = &e->xmaprequest;
 
-	if (!XGetWindowAttributes(display, ev->window, &wa))
-		return;
-	if (wa.override_redirect)
-		return;
-	adopt(ev->window, &wa);
+  if (!XGetWindowAttributes(display, ev->window, &wa))
+    return;
+  if (wa.override_redirect)
+    return;
+  adopt(ev->window, &wa);
 }
 
 int xerror(Display *dpy, XErrorEvent *ee)
 {
-	if (ee->error_code == BadWindow) {
-		return 0;
+  if (ee->error_code == BadWindow) {
+    return 0;
   } 
   return xerrorxlib(dpy, ee); /* may call exit */
 }
 
 void destroyNotify(XEvent *e) {
-	XDestroyWindowEvent *ev = &e->xdestroywindow;
+  XDestroyWindowEvent *ev = &e->xdestroywindow;
 
   unadopt(ev->window);
 
@@ -146,10 +146,10 @@ void focus (Window w) {
 
 void enterNotify(XEvent *e)
 {
-	XCrossingEvent *ev = &e->xcrossing;
+  XCrossingEvent *ev = &e->xcrossing;
 
-	if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root) {
-		return;
+  if ((ev->mode != NotifyNormal || ev->detail == NotifyInferior) && ev->window != root) {
+    return;
   }
 
   focus(ev->window);
@@ -157,26 +157,26 @@ void enterNotify(XEvent *e)
 
 int sendevent(Window w, Atom proto)
 {
-	int n;
-	Atom *protocols;
-	int exists = 0;
-	XEvent ev;
+  int n;
+  Atom *protocols;
+  int exists = 0;
+  XEvent ev;
 
-	if (XGetWMProtocols(display, w, &protocols, &n)) {
-		while (!exists && n--)
-			exists = protocols[n] == proto;
-		XFree(protocols);
-	}
-	if (exists) {
-		ev.type = ClientMessage;
-		ev.xclient.window = w;
-		ev.xclient.message_type = wmatom[WMProtocols];
-		ev.xclient.format = 32;
-		ev.xclient.data.l[0] = proto;
-		ev.xclient.data.l[1] = CurrentTime;
-		XSendEvent(display, w, False, NoEventMask, &ev);
-	}
-	return exists;
+  if (XGetWMProtocols(display, w, &protocols, &n)) {
+    while (!exists && n--)
+      exists = protocols[n] == proto;
+    XFree(protocols);
+  }
+  if (exists) {
+    ev.type = ClientMessage;
+    ev.xclient.window = w;
+    ev.xclient.message_type = wmatom[WMProtocols];
+    ev.xclient.format = 32;
+    ev.xclient.data.l[0] = proto;
+    ev.xclient.data.l[1] = CurrentTime;
+    XSendEvent(display, w, False, NoEventMask, &ev);
+  }
+  return exists;
 }
 
 void initialize(void) {
@@ -190,16 +190,16 @@ void initialize(void) {
   root = RootWindow(display, screen);
 
   wa.event_mask = SubstructureRedirectMask|SubstructureNotifyMask
-		|ButtonPressMask|PointerMotionMask|EnterWindowMask
-		|LeaveWindowMask|StructureNotifyMask|PropertyChangeMask;
+    |ButtonPressMask|PointerMotionMask|EnterWindowMask
+    |LeaveWindowMask|StructureNotifyMask|PropertyChangeMask;
 
-	XChangeWindowAttributes(display, root, CWEventMask|CWCursor, &wa);
-	XSelectInput(display, root, wa.event_mask);
+  XChangeWindowAttributes(display, root, CWEventMask|CWCursor, &wa);
+  XSelectInput(display, root, wa.event_mask);
 
   wmatom[WMProtocols] = XInternAtom(display, "WM_PROTOCOLS", False);
-	wmatom[WMDelete] = XInternAtom(display, "WM_DELETE_WINDOW", False);
-	wmatom[WMState] = XInternAtom(display, "WM_STATE", False);
-	wmatom[WMTakeFocus] = XInternAtom(display, "WM_TAKE_FOCUS", False);
+  wmatom[WMDelete] = XInternAtom(display, "WM_DELETE_WINDOW", False);
+  wmatom[WMState] = XInternAtom(display, "WM_STATE", False);
+  wmatom[WMTakeFocus] = XInternAtom(display, "WM_TAKE_FOCUS", False);
 
   printf("Screen: %d\n", screen);
   printf("Root: %lu\n", root);
@@ -208,35 +208,35 @@ void initialize(void) {
 
 int read_line(int fd, char *buf, size_t bufsiz)
 {
-	size_t i = 0;
-	char c = '\0';
+  size_t i = 0;
+  char c = '\0';
 
-	do {
-		if (read(fd, &c, sizeof(char)) != sizeof(char)) {
-			return -1;
+  do {
+    if (read(fd, &c, sizeof(char)) != sizeof(char)) {
+      return -1;
     }
-		buf[i++] = c;
-	} while (c != '\n' && i < bufsiz);
+    buf[i++] = c;
+  } while (c != '\n' && i < bufsiz);
 
-	buf[i - 1] = '\0'; /* eliminates '\n' */
-	return 0;
+  buf[i - 1] = '\0'; /* eliminates '\n' */
+  return 0;
 }
 
 int xerrordummy(Display *display, XErrorEvent *ee)
 {
-	return 0;
+  return 0;
 }
 
 void closeClient(Client *c) {
   Window w = c->window;
   if (!sendevent(w, wmatom[WMDelete])) { 
     XGrabServer(display);
-  	XSetErrorHandler(xerrordummy);
-  	XSetCloseDownMode(display, DestroyAll);
-  	XKillClient(display, w);
-  	XSync(display, False);
-  	XSetErrorHandler(xerror);
-  	XUngrabServer(display);
+    XSetErrorHandler(xerrordummy);
+    XSetCloseDownMode(display, DestroyAll);
+    XKillClient(display, w);
+    XSync(display, False);
+    XSetErrorHandler(xerror);
+    XUngrabServer(display);
     unadopt(w);
   }
 }
@@ -285,47 +285,47 @@ void processCommand(char *buf) {
 
 long getstate(Window w)
 {
-	int format;
-	long result = -1;
-	unsigned char *p = NULL;
-	unsigned long n, extra;
-	Atom real;
+  int format;
+  long result = -1;
+  unsigned char *p = NULL;
+  unsigned long n, extra;
+  Atom real;
 
-	if (XGetWindowProperty(display, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState],
-	                      &real, &format, &n, &extra, (unsigned char **)&p) != Success)
-		return -1;
-	if (n != 0)
-		result = *p;
-	XFree(p);
-	return result;
+  if (XGetWindowProperty(display, w, wmatom[WMState], 0L, 2L, False, wmatom[WMState],
+                        &real, &format, &n, &extra, (unsigned char **)&p) != Success)
+    return -1;
+  if (n != 0)
+    result = *p;
+  XFree(p);
+  return result;
 }
 
 void claimCurrentWindows() {
-	unsigned int i, num;
-	Window d1, d2, *wins = NULL;
-	XWindowAttributes wa;
+  unsigned int i, num;
+  Window d1, d2, *wins = NULL;
+  XWindowAttributes wa;
 
-	if (XQueryTree(display, root, &d1, &d2, &wins, &num)) {
-		for (i = 0; i < num; i++) {
-			if (!XGetWindowAttributes(display, wins[i], &wa) 
-			|| wa.override_redirect || XGetTransientForHint(display, wins[i], &d1)) {
-				continue;
+  if (XQueryTree(display, root, &d1, &d2, &wins, &num)) {
+    for (i = 0; i < num; i++) {
+      if (!XGetWindowAttributes(display, wins[i], &wa) 
+      || wa.override_redirect || XGetTransientForHint(display, wins[i], &d1)) {
+        continue;
       }
-			if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState) {
-				adopt(wins[i], &wa);
+      if (wa.map_state == IsViewable || getstate(wins[i]) == IconicState) {
+        adopt(wins[i], &wa);
       }
-		}
-		for (i = 0; i < num; i++) { /* now the transients */
-			if (!XGetWindowAttributes(display, wins[i], &wa))
-				continue;
-			if (XGetTransientForHint(display, wins[i], &d1)
-			&& (wa.map_state == IsViewable || getstate(wins[i]) == IconicState))
-				adopt(wins[i], &wa);
-		}
-		if (wins)
-			XFree(wins);
+    }
+    for (i = 0; i < num; i++) { /* now the transients */
+      if (!XGetWindowAttributes(display, wins[i], &wa))
+        continue;
+      if (XGetTransientForHint(display, wins[i], &d1)
+      && (wa.map_state == IsViewable || getstate(wins[i]) == IconicState))
+        adopt(wins[i], &wa);
+    }
+    if (wins)
+      XFree(wins);
 
-	}
+  }
 }
 
 void motionNotify(XEvent *e) {
@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
   initialize();
   claimCurrentWindows();
   mainLoop();
-	cleanup();
-	XCloseDisplay(display);
-	return EXIT_SUCCESS;
+  cleanup();
+  XCloseDisplay(display);
+  return EXIT_SUCCESS;
 }
